@@ -1,0 +1,63 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_USER: fastapi
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: fastapi
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U fastapi -d fastapi"
+          --health-interval 5s --health-timeout 3s --health-retries 15
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 15
+    env:
+      APP_ENV: test
+      SECRET_KEY: ci-only-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-random-enough-not-for-production
+      OUTBOX_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      DATABASE_URL: postgresql+asyncpg://fastapi:ci-only-password@127.0.0.1:5432/fastapi
+      REDIS_URL: redis://127.0.0.1:6379/1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.6.2"
+          enable-cache: true
+          python-version: "3.13"
+      - run: uv sync --frozen
+      - run: make lint typecheck
+      - name: Check exported dependency locks
+        run: |
+          uv export --frozen --no-dev --format requirements-txt --output-file requirements/base.txt --quiet
+          uv export --frozen --format requirements-txt --output-file requirements/dev.txt --quiet
+          git diff --exit-code -- requirements/
+      - name: Integration tests and migration upgrade/downgrade
+        run: uv run --frozen python -m scripts.test --cov=app --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+      - name: Build runtime image
+        run: docker build --target runtime --tag fastapi-ci .
+      - name: Validate monitoring
+        run: |
+          docker build --tag fastapi-prom-ci monitoring/prometheus
+          docker run --rm --entrypoint promtool fastapi-prom-ci check config /etc/prometheus/prometheus.yml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage.xml

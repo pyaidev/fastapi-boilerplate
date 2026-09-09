@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reset password</title>
+  <style>body{font:16px system-ui;max-width:28rem;margin:5rem auto;padding:0 1.5rem}label,input,button{display:block}input{box-sizing:border-box;width:100%;margin:.5rem 0 1rem;padding:.75rem}button{padding:.75rem 1.5rem}#message{line-height:1.5}</style>
+  <script src="/static/reset.js" defer></script>
+</head>
+<body><main><h1>Choose a new password</h1>
+<form id="reset"><label>New password<input id="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+<label>Confirm password<input id="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+<button type="submit">Save password</button></form><p id="message" role="status"></p>
+</main></body></html>
