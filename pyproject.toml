@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Modular async FastAPI service with secure auth, PostgreSQL and observability"
 requires-python = ">=3.13,<3.14"
 dependencies = [
-  "fastapi>=0.115,<1", "uvicorn[standard]>=0.34,<1", "uvicorn-worker>=0.3,<1",
+  "fastapi>=0.115,<1", "uvicorn[standard]>=0.52.4,<1", "uvicorn-worker>=0.3,<1",
   "gunicorn>=23,<26", "sqlalchemy[asyncio]>=2.0,<2.1", "asyncpg>=0.30,<1",
   "psycopg[binary]>=3.2,<4", "alembic>=1.15,<2",
   "pydantic-settings>=2.8,<3", "email-validator>=2.2,<3",
