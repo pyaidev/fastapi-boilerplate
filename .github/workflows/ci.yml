@@ -36,7 +36,7 @@ jobs:
       REDIS_URL: redis://127.0.0.1:6379/1
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
         with:
           version: "0.6.2"
           enable-cache: true
