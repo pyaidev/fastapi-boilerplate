@@ -56,7 +56,7 @@ jobs:
         run: |
           docker build --tag fastapi-prom-ci monitoring/prometheus
           docker run --rm --entrypoint promtool fastapi-prom-ci check config /etc/prometheus/prometheus.yml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage
